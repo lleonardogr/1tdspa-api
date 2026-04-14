@@ -2,6 +2,7 @@ package fiap.tds;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +25,20 @@ public class BookResource {
     @GET
     @Path("/{index}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Book getBookById(@PathParam("index") int index){
-        return collection.get(index);
+    public Response getBookById(@PathParam("index") int index){
+        return index > collection.size() - 1 ?
+                Response.status(Response.Status.NOT_FOUND).build() :
+                Response.ok().entity(collection.get(index)).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Book createBook(Book book){
+    public Response createBook(Book book){
+        if(book.getTitle() == null || book.getAuthor() == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity(book).build();
         collection.add(book);
-        return book;
+        return Response.status(Response.Status.CREATED).entity(book).build();
     }
 
     @DELETE
